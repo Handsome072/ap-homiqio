@@ -121,6 +121,7 @@ jobs:
             **/storage/framework/cache/*
             **/storage/framework/sessions/*
             **/storage/framework/views/*
+            ***/vendor/**
           dangerous-clean-slate: false
 
       - name: Check SSH configuration
