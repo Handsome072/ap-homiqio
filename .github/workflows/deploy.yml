@@ -95,6 +95,7 @@ jobs:
             --exclude='storage/framework/cache/*' \
             --exclude='storage/framework/sessions/*' \
             --exclude='storage/framework/views/*' \
+            --exclude='vendor' \
             ./ deploy/
 
       - name: Deploy to cPanel via SFTP
@@ -121,7 +122,7 @@ jobs:
             **/storage/framework/cache/*
             **/storage/framework/sessions/*
             **/storage/framework/views/*
-            ***/vendor/**
+            **/vendor/**
           dangerous-clean-slate: false
 
       - name: Check SSH configuration
