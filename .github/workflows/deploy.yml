@@ -37,6 +37,15 @@ jobs:
             echo "APP_KEY=${{ secrets.APP_KEY }}" >> $GITHUB_ENV
           fi
 
+      - name: Prepare APP_URL
+        id: app_url
+        run: |
+          if [ -n "${{ secrets.APP_URL }}" ] && [ "${{ secrets.APP_URL }}" != "" ]; then
+            echo "url=${{ secrets.APP_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://${{ secrets.APP_DOMAIN }}/api" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create production .env file
         run: |
           cat > .env << EOF
@@ -44,7 +53,7 @@ jobs:
           APP_ENV=production
           APP_KEY=${{ secrets.APP_KEY || env.APP_KEY }}
           APP_DEBUG=false
-          APP_URL=${{ secrets.APP_URL || 'https://${{ secrets.APP_DOMAIN }}/api' }}
+          APP_URL=${{ steps.app_url.outputs.url }}
           APP_TIMEZONE=${{ secrets.APP_TIMEZONE || 'UTC' }}
           APP_LOCALE=${{ secrets.APP_LOCALE || 'en' }}
           APP_FALLBACK_LOCALE=${{ secrets.APP_FALLBACK_LOCALE || 'en' }}
