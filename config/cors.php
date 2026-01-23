@@ -1,5 +1,15 @@
 <?php
 
+// Parse CORS_ALLOWED_ORIGINS from comma-separated string to array
+$allowedOrigins = array_filter(
+    array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000')))
+);
+
+// Ensure we always have at least the default
+if (empty($allowedOrigins)) {
+    $allowedOrigins = ['http://localhost:3000'];
+}
+
 return [
 
     /*
@@ -19,9 +29,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-    ],
+    'allowed_origins' => $allowedOrigins,
 
     'allowed_origins_patterns' => [],
 
