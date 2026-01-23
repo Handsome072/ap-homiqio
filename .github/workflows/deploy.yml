@@ -71,13 +71,6 @@ jobs:
 
           EOF
 
-      - name: Build application
-        run: |
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan route:clear
-          php artisan view:clear
-
       - name: Create deployment package
         run: |
           mkdir -p deploy
