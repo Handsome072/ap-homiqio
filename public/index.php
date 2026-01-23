@@ -5,6 +5,29 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Handle CORS preflight requests early (before any redirects can occur)
+// This ensures OPTIONS requests get proper CORS headers even if the server redirects
+$allowedOrigins = [
+    'http://localhost:3000',
+    'https://homiqio.com',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if (in_array($origin, $allowedOrigins)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Max-Age: 86400');
+    }
+    header('Content-Length: 0');
+    header('Content-Type: text/plain');
+    http_response_code(204);
+    exit;
+}
+
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;

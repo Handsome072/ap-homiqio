@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # Handle CORS Preflight Requests (OPTIONS) - Must be before any redirects
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=204,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -22,4 +26,21 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# CORS Headers - Applied to all responses
+<IfModule mod_headers.c>
+    # Set CORS headers for allowed origins
+    SetEnvIf Origin "^https://homiqio\.com$" CORS_ORIGIN=$0
+    SetEnvIf Origin "^http://localhost:3000$" CORS_ORIGIN=$0
+
+    Header always set Access-Control-Allow-Origin %{CORS_ORIGIN}e env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin" env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Credentials "true" env=CORS_ORIGIN
+    Header always set Access-Control-Max-Age "86400" env=CORS_ORIGIN
+
+    # Handle OPTIONS preflight response
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule .* - [R=204,L]
 </IfModule>
