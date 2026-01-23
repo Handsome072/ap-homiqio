@@ -156,7 +156,7 @@ jobs:
           key: ${{ secrets.CPANEL_SSH_KEY }}
           port: ${{ secrets.CPANEL_SSH_PORT || 22 }}
           script: |
-            cd ${{ secrets.CPANEL_REMOTE_PATH }}
+            cd ${{ secrets.CPANEL_SSH_REMOTE_PATH }}
 
             # Verify .env file exists
             if [ ! -f .env ]; then
