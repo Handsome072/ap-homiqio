@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # Laravel Application
+  app:
+    container_name: homiqio-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-homiqio}
+      - DB_USERNAME=${DB_USERNAME:-sail}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - homiqio-network
+    restart: unless-stopped
+
+  # MySQL Database
+  mysql:
+    container_name: homiqio-mysql
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_DATABASE:-homiqio}
+      MYSQL_USER: ${DB_USERNAME:-sail}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - homiqio-mysql-data:/var/lib/mysql
+    networks:
+      - homiqio-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    container_name: homiqio-redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - homiqio-redis-data:/data
+    networks:
+      - homiqio-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # phpMyAdmin
+  phpmyadmin:
+    container_name: homiqio-phpmyadmin
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USERNAME:-sail}
+      PMA_PASSWORD: ${DB_PASSWORD:-password}
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - homiqio-network
+    restart: unless-stopped
+
+networks:
+  homiqio-network:
+    driver: bridge
+    name: homiqio-network
+
+volumes:
+  homiqio-mysql-data:
+    driver: local
+    name: homiqio-mysql-data
+  homiqio-redis-data:
+    driver: local
+    name: homiqio-redis-data
+

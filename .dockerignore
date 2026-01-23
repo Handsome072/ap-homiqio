@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yml
+docker-compose*.yml
+Dockerfile
+.docker
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.phpunit.result.cache
+phpunit.xml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node
+node_modules
+
+# Build artifacts
+.env.backup
+.env.production
+
