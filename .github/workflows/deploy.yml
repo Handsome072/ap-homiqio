@@ -118,9 +118,18 @@ jobs:
             **/storage/framework/views/*
           dangerous-clean-slate: false
 
+      - name: Check SSH configuration
+        id: check_ssh
+        run: |
+          if [ -n "${{ secrets.CPANEL_SSH_HOST }}" ] && [ -n "${{ secrets.CPANEL_SSH_KEY }}" ]; then
+            echo "ssh_configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "ssh_configured=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run post-deployment commands via SSH
         uses: appleboy/ssh-action@v1.0.3
-        if: ${{ secrets.CPANEL_SSH_HOST != '' && secrets.CPANEL_SSH_KEY != '' }}
+        if: steps.check_ssh.outputs.ssh_configured == 'true'
         with:
           host: ${{ secrets.CPANEL_SSH_HOST }}
           username: ${{ secrets.CPANEL_SSH_USERNAME }}
@@ -161,7 +170,7 @@ jobs:
             php artisan optimize || true
 
       - name: Post-deployment instructions (if SSH not configured)
-        if: ${{ secrets.CPANEL_SSH_HOST == '' || secrets.CPANEL_SSH_KEY == '' }}
+        if: steps.check_ssh.outputs.ssh_configured == 'false'
         run: |
           echo "::notice::SSH not configured. Please run these commands manually via cPanel Terminal:"
           echo "::notice::cd ${{ secrets.CPANEL_REMOTE_PATH }}"
