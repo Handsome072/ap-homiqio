@@ -78,6 +78,10 @@ jobs:
           MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}
           MAIL_FROM_NAME=${{ secrets.APP_NAME }}
 
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+          SANCTUM_STATEFUL_DOMAINS=${{ secrets.SANCTUM_STATEFUL_DOMAINS }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+
           EOF
 
       - name: Create deployment package
