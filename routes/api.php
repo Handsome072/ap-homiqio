@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ListingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,11 +40,19 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 });
 
-// Protected auth routes (requires authentication)
+// Protected routes (requires authentication)
 Route::middleware('auth:sanctum')->group(function () {
+    // Auth
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::post('/resend-verification', [AuthController::class, 'resendVerification']);
     });
+
+    // Listings (Logements)
+    Route::get('/listings', [ListingController::class, 'index']);
+    Route::post('/listings', [ListingController::class, 'store']);
+    Route::get('/listings/{id}', [ListingController::class, 'show']);
+    Route::put('/listings/{id}', [ListingController::class, 'update']);
+    Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
 });

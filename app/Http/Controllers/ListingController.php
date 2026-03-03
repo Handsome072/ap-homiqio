@@ -1,0 +1,264 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Listing;
+use App\Models\ListingPhoto;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+
+class ListingController extends Controller
+{
+    /**
+     * GET /api/listings
+     * Returns all listings for the authenticated user.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $listings = $request->user()
+            ->listings()
+            ->with('photos')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'listings' => $listings->map(fn ($listing) => $this->formatListing($listing)),
+        ]);
+    }
+
+    /**
+     * POST /api/listings
+     * Creates a new listing with all form data + base64 photos.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'title'      => 'required|string|max:255',
+            'city'       => 'required|string|max:255',
+            'capacity'   => 'required|integer|min:1',
+            'base_price' => 'required|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+
+        $listing = Listing::create([
+            'user_id'          => $user->id,
+            'status'           => 'pending',
+            'rental_frequency' => $request->rental_frequency,
+            'space_type'       => $request->space_type,
+            'full_address'     => $request->full_address,
+            'street'           => $request->street,
+            'city'             => $request->city,
+            'postal_code'      => $request->postal_code,
+            'mrc'              => $request->mrc,
+            'county'           => $request->county,
+            'province'         => $request->province ?? 'QC',
+            'country'          => $request->country ?? 'CA',
+            'capacity'         => $request->capacity,
+            'adults'           => $request->adults,
+            'bathrooms'        => $request->bathrooms ?? 1,
+            'bedrooms_data'    => $request->bedrooms_data,
+            'open_areas_data'  => $request->open_areas_data,
+            'amenities'        => $request->amenities,
+            'expectations'     => $request->expectations,
+            'permissions'      => $request->permissions,
+            'title'            => $request->title,
+            'subtitle'         => $request->subtitle,
+            'description'      => $request->description,
+            'about_chalet'     => $request->about_chalet,
+            'host_availability'=> $request->host_availability,
+            'neighborhood'     => $request->neighborhood,
+            'transport'        => $request->transport,
+            'other_info'       => $request->other_info,
+            'reservation_mode' => $request->reservation_mode ?? 'request',
+            'arrival_time'     => $request->arrival_time,
+            'departure_time'   => $request->departure_time,
+            'min_age'          => $request->min_age ?? 18,
+            'min_stay'         => $request->min_stay,
+            'max_stay'         => $request->max_stay,
+            'arrival_days'     => $request->arrival_days,
+            'departure_days'   => $request->departure_days,
+            'currency'         => $request->currency ?? 'CAD',
+            'base_price'       => $request->base_price,
+            'weekend_price'    => $request->weekend_price ?: null,
+            'weekly_price'     => $request->weekly_price ?: null,
+            'monthly_price'    => $request->monthly_price ?: null,
+            'cleaning_fee'     => $request->cleaning_fee ?? 0,
+            'security_deposit' => $request->security_deposit ?? 0,
+            'extra_guest_fee'  => $request->extra_guest_fee ?: null,
+            'pet_fee'          => $request->pet_fee ?: null,
+            'cancellation_policy' => $request->cancellation_policy,
+            'tax_registration' => $request->tax_registration,
+            'taxes_included'   => $request->taxes_included,
+            'accepted_local_laws' => $request->accepted_local_laws ?? false,
+            'wifi_speed'       => $request->wifi_speed,
+            'has_wifi'         => $request->has_wifi,
+            'checkin_method'   => $request->checkin_method,
+            'checkin_instructions' => $request->checkin_instructions,
+            'phone_number'     => $request->phone_number,
+            'country_code'     => $request->country_code,
+            'signature_name'   => $request->signature_name,
+            'signed_at'        => $request->signed ? now() : null,
+        ]);
+
+        // Save host photo (base64)
+        if ($request->host_photo) {
+            $hostPhotoPath = $this->saveBase64Image(
+                $request->host_photo,
+                "listings/{$listing->id}/host"
+            );
+            $listing->update(['host_photo_path' => $hostPhotoPath]);
+        }
+
+        // Save chalet photos (array of base64)
+        if ($request->chalet_photos && is_array($request->chalet_photos)) {
+            foreach ($request->chalet_photos as $index => $base64Photo) {
+                $photoPath = $this->saveBase64Image(
+                    $base64Photo,
+                    "listings/{$listing->id}"
+                );
+                ListingPhoto::create([
+                    'listing_id' => $listing->id,
+                    'path'       => $photoPath,
+                    'order'      => $index,
+                ]);
+            }
+        }
+
+        $listing->load('photos');
+
+        return response()->json([
+            'message' => 'Annonce créée avec succès. Elle sera examinée par notre équipe.',
+            'listing' => $this->formatListing($listing),
+        ], 201);
+    }
+
+    /**
+     * GET /api/listings/{id}
+     * Returns a single listing (must belong to authenticated user).
+     */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $listing = $request->user()->listings()->with('photos')->findOrFail($id);
+
+        return response()->json([
+            'listing' => $this->formatListing($listing),
+        ]);
+    }
+
+    /**
+     * PUT /api/listings/{id}
+     * Updates an existing listing.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $listing = $request->user()->listings()->findOrFail($id);
+
+        $listing->update($request->except(['host_photo', 'chalet_photos', '_method']));
+
+        // Update host photo if provided
+        if ($request->host_photo && str_starts_with($request->host_photo, 'data:')) {
+            if ($listing->host_photo_path) {
+                Storage::disk('public')->delete($listing->host_photo_path);
+            }
+            $hostPhotoPath = $this->saveBase64Image(
+                $request->host_photo,
+                "listings/{$listing->id}/host"
+            );
+            $listing->update(['host_photo_path' => $hostPhotoPath]);
+        }
+
+        $listing->load('photos');
+
+        return response()->json([
+            'message' => 'Annonce mise à jour avec succès.',
+            'listing' => $this->formatListing($listing),
+        ]);
+    }
+
+    /**
+     * DELETE /api/listings/{id}
+     * Deletes a listing and all its photos from storage.
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $listing = $request->user()->listings()->with('photos')->findOrFail($id);
+
+        // Delete all chalet photos from storage
+        foreach ($listing->photos as $photo) {
+            Storage::disk('public')->delete($photo->path);
+        }
+
+        // Delete host photo from storage
+        if ($listing->host_photo_path) {
+            Storage::disk('public')->delete($listing->host_photo_path);
+        }
+
+        $listing->delete();
+
+        return response()->json(['message' => 'Annonce supprimée avec succès.']);
+    }
+
+    /**
+     * Decode a base64 image and save to public storage.
+     * Returns the storage path.
+     */
+    private function saveBase64Image(string $base64Data, string $directory): string
+    {
+        // Strip the data:image/xxx;base64, prefix
+        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
+        $decoded   = base64_decode($imageData);
+
+        // Detect MIME type and set extension
+        $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($decoded);
+        $ext      = match ($mimeType) {
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/webp' => 'webp',
+            'image/gif'  => 'gif',
+            default      => 'jpg',
+        };
+
+        $fileName = uniqid('img_', true) . '.' . $ext;
+        $path     = "{$directory}/{$fileName}";
+
+        Storage::disk('public')->put($path, $decoded);
+
+        return $path;
+    }
+
+    /**
+     * Format a listing for API response.
+     */
+    private function formatListing(Listing $listing): array
+    {
+        return [
+            'id'                 => $listing->id,
+            'status'             => $listing->status,
+            'title'              => $listing->title,
+            'subtitle'           => $listing->subtitle,
+            'city'               => $listing->city,
+            'province'           => $listing->province,
+            'country'            => $listing->country,
+            'space_type'         => $listing->space_type,
+            'capacity'           => $listing->capacity,
+            'bathrooms'          => $listing->bathrooms,
+            'base_price'         => $listing->base_price,
+            'currency'           => $listing->currency,
+            'cancellation_policy'=> $listing->cancellation_policy,
+            'reservation_mode'   => $listing->reservation_mode,
+            'host_photo_url'     => $listing->host_photo_path
+                ? Storage::disk('public')->url($listing->host_photo_path)
+                : null,
+            'photos'             => $listing->photos->map(fn ($p) => [
+                'id'    => $p->id,
+                'url'   => Storage::disk('public')->url($p->path),
+                'order' => $p->order,
+            ])->values(),
+            'created_at'         => $listing->created_at,
+            'updated_at'         => $listing->updated_at,
+        ];
+    }
+}
