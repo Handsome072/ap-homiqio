@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\ResetPasswordMail;
 use App\Mail\VerifyEmail;
 
 class AuthController extends Controller
@@ -239,7 +242,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Request password reset.
+     * Request password reset — generates token, stores it, sends email.
      */
     public function forgotPassword(Request $request): JsonResponse
     {
@@ -247,17 +250,86 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // For security, always return success even if email doesn't exist
         $user = User::where('email', $request->email)->first();
 
         if ($user) {
-            // In production, send password reset email
-            // For now, just log it
-            \Log::info('Password reset requested for: ' . $request->email);
+            $plainToken = Str::random(64);
+
+            // Store hashed token (upsert so one reset per email at a time)
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $user->email],
+                [
+                    'token'      => Hash::make($plainToken),
+                    'created_at' => now(),
+                ]
+            );
+
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $plainToken));
         }
 
+        // Always return success to prevent email enumeration
         return response()->json([
             'message' => 'Si cette adresse email existe, un lien de réinitialisation a été envoyé.',
+        ]);
+    }
+
+    /**
+     * Reset password using the token received by email.
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email'                 => ['required', 'email'],
+            'token'                 => ['required', 'string'],
+            'password'              => ['required', 'string', Password::min(8), 'confirmed'],
+            'password_confirmation' => ['required', 'string'],
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $validated['email'])
+            ->first();
+
+        if (! $record || ! Hash::check($validated['token'], $record->token)) {
+            return response()->json([
+                'message' => 'Lien de réinitialisation invalide ou expiré.',
+            ], 400);
+        }
+
+        // Token expires after 60 minutes
+        if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+            DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
+            return response()->json([
+                'message' => 'Le lien a expiré. Veuillez en demander un nouveau.',
+            ], 400);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return response()->json(['message' => 'Utilisateur introuvable.'], 404);
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        // Invalidate the reset token
+        DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
+        // Revoke all previous tokens and issue a fresh one
+        $user->tokens()->delete();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Mot de passe réinitialisé avec succès.',
+            'user' => [
+                'id'             => $user->id,
+                'first_name'     => $user->first_name,
+                'last_name'      => $user->last_name,
+                'email'          => $user->email,
+                'email_verified' => $user->hasVerifiedEmail(),
+            ],
+            'token' => $token,
         ]);
     }
 }

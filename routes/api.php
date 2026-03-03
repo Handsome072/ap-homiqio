@@ -38,6 +38,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail']);
     Route::post('/set-password', [AuthController::class, 'setPassword']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
 // Protected routes (requires authentication)
