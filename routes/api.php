@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\AdminListingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,5 +63,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/check', function () {
             return response()->json(['admin' => true]);
         });
+
+        // Admin Listings Management
+        Route::get('/listings', [AdminListingController::class, 'index']);
+        Route::get('/listings/{id}', [AdminListingController::class, 'show']);
+        Route::post('/listings/{id}/approve', [AdminListingController::class, 'approve']);
+        Route::post('/listings/{id}/reject', [AdminListingController::class, 'reject']);
+        Route::post('/listings/{id}/suspend', [AdminListingController::class, 'suspend']);
+        Route::delete('/listings/{id}', [AdminListingController::class, 'destroy']);
     });
 });
