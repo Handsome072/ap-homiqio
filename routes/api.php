@@ -56,4 +56,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/listings/{id}', [ListingController::class, 'show']);
     Route::put('/listings/{id}', [ListingController::class, 'update']);
     Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
+
+    // Admin routes
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/check', function () {
+            return response()->json(['admin' => true]);
+        });
+    });
 });
