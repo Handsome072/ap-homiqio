@@ -32,6 +32,10 @@ Route::get('/health', function () {
 |--------------------------------------------------------------------------
 */
 
+// Public listings (no authentication required)
+Route::get('/listings/public', [ListingController::class, 'publicIndex']);
+Route::get('/listings/public/{id}', [ListingController::class, 'publicShow']);
+
 // Public auth routes (no authentication required)
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

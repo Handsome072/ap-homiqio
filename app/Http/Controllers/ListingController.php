@@ -11,6 +11,37 @@ use Illuminate\Support\Facades\Storage;
 class ListingController extends Controller
 {
     /**
+     * GET /api/listings/public
+     * Returns all active listings (no auth required).
+     */
+    public function publicIndex(): JsonResponse
+    {
+        $listings = Listing::with('photos')
+            ->where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'listings' => $listings->map(fn ($listing) => $this->formatListing($listing)),
+        ]);
+    }
+
+    /**
+     * GET /api/listings/public/{id}
+     * Returns a single active listing (no auth required).
+     */
+    public function publicShow(int $id): JsonResponse
+    {
+        $listing = Listing::with('photos')
+            ->where('status', 'active')
+            ->findOrFail($id);
+
+        return response()->json([
+            'listing' => $this->formatListing($listing),
+        ]);
+    }
+
+    /**
      * GET /api/listings
      * Returns all listings for the authenticated user.
      */
