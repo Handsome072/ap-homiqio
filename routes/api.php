@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\AdminListingController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\ConversationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +68,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/profile/photo', [UserProfileController::class, 'uploadPhoto']);
         Route::get('/profile/public', [UserProfileController::class, 'publicProfile']);
         Route::post('/account/deactivate', [UserProfileController::class, 'deactivateAccount']);
+    });
+
+    // Conversations (Messaging)
+    Route::prefix('conversations')->group(function () {
+        Route::get('/', [ConversationController::class, 'index']);
+        Route::get('/{id}/messages', [ConversationController::class, 'messages']);
+        Route::post('/{id}/messages', [ConversationController::class, 'sendMessage']);
+        Route::post('/{id}/messages/image', [ConversationController::class, 'sendImage']);
+        Route::post('/{id}/read', [ConversationController::class, 'markAsRead']);
+        Route::post('/{id}/unread', [ConversationController::class, 'markAsUnread']);
+        Route::post('/{id}/archive', [ConversationController::class, 'archive']);
+        Route::post('/{id}/unarchive', [ConversationController::class, 'unarchive']);
     });
 
     // Listings (Logements)

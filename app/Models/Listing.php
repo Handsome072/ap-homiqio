@@ -108,4 +108,9 @@ class Listing extends Model
     {
         return $this->hasMany(ListingPhoto::class)->orderBy('order');
     }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }
