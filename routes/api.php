@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\AdminListingController;
+use App\Http\Controllers\UserProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::post('/resend-verification', [AuthController::class, 'resendVerification']);
+    });
+
+    // User Profile & Settings
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [UserProfileController::class, 'show']);
+        Route::put('/profile', [UserProfileController::class, 'updatePersonalInfo']);
+        Route::put('/password', [UserProfileController::class, 'updatePassword']);
+        Route::put('/notifications', [UserProfileController::class, 'updateNotifications']);
+        Route::put('/preferences', [UserProfileController::class, 'updatePreferences']);
+        Route::put('/profile/bio', [UserProfileController::class, 'updateProfile']);
+        Route::post('/profile/photo', [UserProfileController::class, 'uploadPhoto']);
+        Route::get('/profile/public', [UserProfileController::class, 'publicProfile']);
+        Route::post('/account/deactivate', [UserProfileController::class, 'deactivateAccount']);
     });
 
     // Listings (Logements)

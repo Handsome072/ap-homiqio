@@ -28,6 +28,24 @@ class User extends Authenticatable implements MustVerifyEmail
         'birth_date',
         'receive_marketing',
         'email_verification_token',
+        'phone',
+        'phone_country_code',
+        'address_street',
+        'address_city',
+        'address_postal_code',
+        'address_country',
+        'bio',
+        'city',
+        'profession',
+        'languages_spoken',
+        'interests',
+        'profile_photo_url',
+        'preferred_language',
+        'preferred_currency',
+        'timezone',
+        'notification_preferences',
+        'phone_verified',
+        'identity_verified',
     ];
 
     /**
@@ -52,6 +70,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'birth_date' => 'date',
             'receive_marketing' => 'boolean',
+            'languages_spoken' => 'array',
+            'interests' => 'array',
+            'notification_preferences' => 'array',
+            'phone_verified' => 'boolean',
+            'identity_verified' => 'boolean',
         ];
     }
 
