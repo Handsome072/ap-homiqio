@@ -7,6 +7,7 @@ use App\Http\Controllers\ListingController;
 use App\Http\Controllers\AdminListingController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\HostRevenueController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +81,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/unread', [ConversationController::class, 'markAsUnread']);
         Route::post('/{id}/archive', [ConversationController::class, 'archive']);
         Route::post('/{id}/unarchive', [ConversationController::class, 'unarchive']);
+    });
+
+    // Host Revenue & Payouts
+    Route::prefix('host/revenues')->group(function () {
+        Route::get('/summary', [HostRevenueController::class, 'summary']);
+        Route::get('/chart', [HostRevenueController::class, 'chart']);
+        Route::get('/stats', [HostRevenueController::class, 'stats']);
+        Route::get('/upcoming', [HostRevenueController::class, 'upcoming']);
+        Route::get('/history', [HostRevenueController::class, 'history']);
+        Route::get('/export', [HostRevenueController::class, 'export']);
+        Route::get('/listings', [HostRevenueController::class, 'listings']);
+        Route::get('/{id}', [HostRevenueController::class, 'show']);
     });
 
     // Listings (Logements)
