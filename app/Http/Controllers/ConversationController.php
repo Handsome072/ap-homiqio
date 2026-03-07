@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Conversation;
+use App\Models\Listing;
 use App\Models\Message;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class ConversationController extends Controller
 
         $query = Conversation::with([
             'reservation.listing.photos',
+            'listing.photos',
             'host:id,first_name,last_name,profile_photo_url',
             'guest:id,first_name,last_name,profile_photo_url',
             'lastMessage',
@@ -100,6 +102,7 @@ class ConversationController extends Controller
 
         $conversation = Conversation::with([
             'reservation.listing.photos',
+            'listing.photos',
             'host:id,first_name,last_name,profile_photo_url',
             'guest:id,first_name,last_name,profile_photo_url',
             'lastMessage',
@@ -274,13 +277,93 @@ class ConversationController extends Controller
         return response()->json(['message' => 'Conversation désarchivée']);
     }
 
+    /**
+     * GET /api/conversations/unread-count
+     * Returns total unread message count for the authenticated user.
+     */
+    public function unreadCount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $role = $request->query('role', 'guest');
+
+        $conversationIds = Conversation::query()
+            ->when($role === 'host', fn ($q) => $q->where('host_id', $user->id))
+            ->when($role !== 'host', fn ($q) => $q->where('guest_id', $user->id))
+            ->pluck('id');
+
+        $count = Message::whereIn('conversation_id', $conversationIds)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json(['unread_count' => $count]);
+    }
+
+    /**
+     * POST /api/conversations/start
+     * Start or find an existing conversation with a listing's host.
+     */
+    public function startConversation(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'listing_id' => 'required|integer|exists:listings,id',
+            'message'    => 'required|string|max:5000',
+        ]);
+
+        $listing = Listing::findOrFail($request->input('listing_id'));
+        $hostId = $listing->user_id;
+
+        if ($hostId === $user->id) {
+            return response()->json(['message' => 'Vous ne pouvez pas vous envoyer un message à vous-même'], 422);
+        }
+
+        // Find existing conversation between this guest and host for this listing
+        $conversation = Conversation::where('listing_id', $listing->id)
+            ->where('host_id', $hostId)
+            ->where('guest_id', $user->id)
+            ->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'listing_id' => $listing->id,
+                'host_id'    => $hostId,
+                'guest_id'   => $user->id,
+            ]);
+        }
+
+        // Send the message
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id'       => $user->id,
+            'text'            => $request->input('message'),
+        ]);
+
+        $conversation->touch();
+
+        $conversation->load([
+            'listing.photos',
+            'host:id,first_name,last_name,profile_photo_url',
+            'guest:id,first_name,last_name,profile_photo_url',
+            'lastMessage',
+        ]);
+
+        return response()->json([
+            'conversation_id' => $conversation->id,
+            'message'         => $this->formatMessage($message),
+        ], 201);
+    }
+
     // ─── Formatters ─────────────────────────────────────────────────────
 
     private function formatConversation(Conversation $conv, int $currentUserId): array
     {
         $reservation = $conv->reservation;
-        $listing = $reservation->listing;
-        $firstPhoto = $listing->photos->first();
+
+        // Get listing from reservation or directly from the conversation
+        $listing = $reservation?->listing ?? $conv->listing;
+        $firstPhoto = $listing?->photos?->first();
 
         // Count unread messages (from the other participant)
         $unreadCount = Message::where('conversation_id', $conv->id)
@@ -292,7 +375,7 @@ class ConversationController extends Controller
 
         return [
             'id' => $conv->id,
-            'reservation' => [
+            'reservation' => $reservation ? [
                 'id' => $reservation->id,
                 'check_in' => $reservation->check_in->toDateString(),
                 'check_out' => $reservation->check_out->toDateString(),
@@ -303,7 +386,12 @@ class ConversationController extends Controller
                     'title' => $listing->title,
                     'photo_url' => $firstPhoto ? Storage::disk('public')->url($firstPhoto->path) : null,
                 ],
-            ],
+            ] : null,
+            'listing' => $listing ? [
+                'id' => $listing->id,
+                'title' => $listing->title,
+                'photo_url' => $firstPhoto ? Storage::disk('public')->url($firstPhoto->path) : null,
+            ] : null,
             'host' => [
                 'id' => $conv->host->id,
                 'first_name' => $conv->host->first_name,

@@ -14,6 +14,7 @@ class Conversation extends Model
 
     protected $fillable = [
         'reservation_id',
+        'listing_id',
         'host_id',
         'guest_id',
         'host_archived',
@@ -31,6 +32,11 @@ class Conversation extends Model
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    public function listing(): BelongsTo
+    {
+        return $this->belongsTo(Listing::class);
     }
 
     public function host(): BelongsTo

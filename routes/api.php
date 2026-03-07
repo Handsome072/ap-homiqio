@@ -74,6 +74,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Conversations (Messaging)
     Route::prefix('conversations')->group(function () {
+        Route::post('/start', [ConversationController::class, 'startConversation']);
+        Route::get('/unread-count', [ConversationController::class, 'unreadCount']);
         Route::get('/', [ConversationController::class, 'index']);
         Route::get('/{id}/messages', [ConversationController::class, 'messages']);
         Route::post('/{id}/messages', [ConversationController::class, 'sendMessage']);
