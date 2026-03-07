@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Models\ListingPhoto;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -28,16 +29,16 @@ class ListingController extends Controller
 
     /**
      * GET /api/listings/public/{id}
-     * Returns a single active listing (no auth required).
+     * Returns a single active listing with host info and reviews (no auth required).
      */
     public function publicShow(int $id): JsonResponse
     {
-        $listing = Listing::with('photos')
+        $listing = Listing::with(['photos', 'user', 'reviews.user'])
             ->where('status', 'active')
             ->findOrFail($id);
 
         return response()->json([
-            'listing' => $this->formatListing($listing),
+            'listing' => $this->formatListingDetail($listing),
         ]);
     }
 
@@ -281,11 +282,11 @@ class ListingController extends Controller
             'cancellation_policy' => $listing->cancellation_policy,
             'reservation_mode'    => $listing->reservation_mode,
             'host_photo_url'      => $listing->host_photo_path
-                ? Storage::disk('public')->url($listing->host_photo_path)
+                ? (str_starts_with($listing->host_photo_path, 'http') ? $listing->host_photo_path : Storage::disk('public')->url($listing->host_photo_path))
                 : null,
             'photos'              => $listing->photos->map(fn ($p) => [
                 'id'    => $p->id,
-                'url'   => Storage::disk('public')->url($p->path),
+                'url'   => str_starts_with($p->path, 'http') ? $p->path : Storage::disk('public')->url($p->path),
                 'order' => $p->order,
             ])->values(),
             'created_at'          => $listing->created_at,
@@ -332,6 +333,80 @@ class ListingController extends Controller
             'checkin_instructions' => $listing->checkin_instructions,
             'phone_number'        => $listing->phone_number,
             'country_code'        => $listing->country_code,
+            'latitude'            => $listing->latitude,
+            'longitude'           => $listing->longitude,
         ];
+    }
+
+    /**
+     * Format a listing with host info and reviews for the detail page.
+     */
+    private function formatListingDetail(Listing $listing): array
+    {
+        $base = $this->formatListing($listing);
+
+        // Host info
+        $host = $listing->user;
+        $hostListingIds = Listing::where('user_id', $host->id)->pluck('id');
+        $hostReviewsCount = Review::whereIn('listing_id', $hostListingIds)->count();
+        $hostAvgRating = Review::whereIn('listing_id', $hostListingIds)->avg('rating');
+
+        $base['host'] = [
+            'id'                => $host->id,
+            'first_name'        => $host->first_name,
+            'profile_photo_url' => $host->profile_photo_url
+                ?? ($listing->host_photo_path
+                    ? Storage::disk('public')->url($listing->host_photo_path)
+                    : null),
+            'profession'        => $host->profession,
+            'interests'         => $host->interests,
+            'languages_spoken'  => $host->languages_spoken,
+            'identity_verified' => $host->identity_verified ?? false,
+            'phone_verified'    => $host->phone_verified ?? false,
+            'member_since'      => $host->created_at->toISOString(),
+            'reviews_count'     => $hostReviewsCount,
+            'average_rating'    => $hostAvgRating ? round($hostAvgRating, 2) : null,
+            'response_rate'     => 92,
+            'response_time'     => "dans l'heure",
+        ];
+
+        // Reviews summary
+        $reviews = $listing->reviews;
+        $reviewsCount = $reviews->count();
+        $avgRating = $reviewsCount > 0 ? round($reviews->avg('rating'), 2) : null;
+
+        $ratingDistribution = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $ratingDistribution[$i] = $reviews->filter(fn ($r) => round($r->rating) == $i)->count();
+        }
+
+        $base['reviews_summary'] = [
+            'count'               => $reviewsCount,
+            'average_rating'      => $avgRating,
+            'cleanliness_avg'     => $reviewsCount > 0 ? round($reviews->avg('cleanliness_rating'), 1) : null,
+            'accuracy_avg'        => $reviewsCount > 0 ? round($reviews->avg('accuracy_rating'), 1) : null,
+            'checkin_avg'         => $reviewsCount > 0 ? round($reviews->avg('checkin_rating'), 1) : null,
+            'communication_avg'   => $reviewsCount > 0 ? round($reviews->avg('communication_rating'), 1) : null,
+            'location_avg'        => $reviewsCount > 0 ? round($reviews->avg('location_rating'), 1) : null,
+            'value_avg'           => $reviewsCount > 0 ? round($reviews->avg('value_rating'), 1) : null,
+            'rating_distribution' => $ratingDistribution,
+            'is_guest_favorite'   => $avgRating !== null && $avgRating >= 4.9,
+        ];
+
+        // Latest reviews
+        $latestReviews = $reviews->sortByDesc('created_at')->take(6)->values();
+        $base['reviews'] = $latestReviews->map(fn ($review) => [
+            'id'         => $review->id,
+            'rating'     => $review->rating,
+            'text'       => $review->text,
+            'created_at' => $review->created_at->toISOString(),
+            'user'       => [
+                'first_name'        => $review->user->first_name,
+                'profile_photo_url' => $review->user->profile_photo_url,
+                'member_since'      => $review->user->created_at->toISOString(),
+            ],
+        ])->toArray();
+
+        return $base;
     }
 }

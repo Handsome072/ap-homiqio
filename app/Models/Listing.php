@@ -25,6 +25,8 @@ class Listing extends Model
         'county',
         'province',
         'country',
+        'latitude',
+        'longitude',
         'capacity',
         'adults',
         'bathrooms',
@@ -96,6 +98,8 @@ class Listing extends Model
             'security_deposit' => 'decimal:2',
             'extra_guest_fee' => 'decimal:2',
             'pet_fee'         => 'decimal:2',
+            'latitude'        => 'decimal:7',
+            'longitude'       => 'decimal:7',
         ];
     }
 
@@ -112,5 +116,10 @@ class Listing extends Model
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }
