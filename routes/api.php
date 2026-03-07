@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminListingController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HostRevenueController;
+use App\Http\Controllers\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/listings', [HostRevenueController::class, 'listings']);
         Route::get('/{id}', [HostRevenueController::class, 'show']);
     });
+
+    // Reviews
+    Route::post('/listings/{id}/reviews', [ReviewController::class, 'store']);
 
     // Listings (Logements)
     Route::get('/listings', [ListingController::class, 'index']);

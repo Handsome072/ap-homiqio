@@ -22,7 +22,6 @@ return new class extends Migration
             $table->decimal('value_rating', 2, 1)->nullable();
             $table->timestamps();
 
-            $table->unique(['listing_id', 'user_id']);
             $table->index(['listing_id', 'created_at']);
         });
     }
