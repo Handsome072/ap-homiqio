@@ -86,6 +86,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return trim("{$this->first_name} {$this->last_name}");
     }
 
+    /**
+     * Get the full URL for the profile photo.
+     */
+    public function getProfilePhotoFullUrlAttribute(): ?string
+    {
+        if (!$this->profile_photo_url) {
+            return null;
+        }
+
+        if (str_starts_with($this->profile_photo_url, 'http')) {
+            return $this->profile_photo_url;
+        }
+
+        return url($this->profile_photo_url);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

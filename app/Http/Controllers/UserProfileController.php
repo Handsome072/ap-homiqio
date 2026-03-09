@@ -171,7 +171,7 @@ class UserProfileController extends Controller
 
         return response()->json([
             'message' => 'Photo de profil mise à jour.',
-            'profile_photo_url' => '/storage/' . $path,
+            'profile_photo_url' => url('/storage/' . $path),
         ]);
     }
 
@@ -185,7 +185,7 @@ class UserProfileController extends Controller
         return response()->json([
             'profile' => [
                 'first_name' => $user->first_name,
-                'profile_photo_url' => $user->profile_photo_url,
+                'profile_photo_url' => $user->profile_photo_full_url,
                 'bio' => $user->bio,
                 'city' => $user->city,
                 'profession' => $user->profession,
@@ -252,7 +252,7 @@ class UserProfileController extends Controller
             'profession' => $user->profession,
             'languages_spoken' => $user->languages_spoken ?? [],
             'interests' => $user->interests ?? [],
-            'profile_photo_url' => $user->profile_photo_url,
+            'profile_photo_url' => $user->profile_photo_full_url,
             'preferred_language' => $user->preferred_language,
             'preferred_currency' => $user->preferred_currency,
             'timezone' => $user->timezone,

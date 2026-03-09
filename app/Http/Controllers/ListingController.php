@@ -406,7 +406,7 @@ class ListingController extends Controller
         $base['host'] = [
             'id'                => $host->id,
             'first_name'        => $host->first_name,
-            'profile_photo_url' => $host->profile_photo_url
+            'profile_photo_url' => $host->profile_photo_full_url
                 ?? ($listing->host_photo_path
                     ? Storage::disk('public')->url($listing->host_photo_path)
                     : null),
@@ -454,7 +454,7 @@ class ListingController extends Controller
             'created_at' => $review->created_at->toISOString(),
             'user'       => [
                 'first_name'        => $review->user->first_name,
-                'profile_photo_url' => $review->user->profile_photo_url,
+                'profile_photo_url' => $review->user->profile_photo_full_url,
                 'member_since'      => $review->user->created_at->toISOString(),
             ],
         ])->toArray();

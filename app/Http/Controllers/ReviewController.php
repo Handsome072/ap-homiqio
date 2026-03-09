@@ -45,7 +45,7 @@ class ReviewController extends Controller
                 'created_at' => $review->created_at->toISOString(),
                 'user'       => [
                     'first_name'        => $review->user->first_name,
-                    'profile_photo_url' => $review->user->profile_photo_url,
+                    'profile_photo_url' => $review->user->profile_photo_full_url,
                     'member_since'      => $review->user->created_at->toISOString(),
                 ],
             ],

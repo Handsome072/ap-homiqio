@@ -396,13 +396,13 @@ class ConversationController extends Controller
                 'id' => $conv->host->id,
                 'first_name' => $conv->host->first_name,
                 'last_name' => $conv->host->last_name,
-                'profile_photo_url' => $conv->host->profile_photo_url,
+                'profile_photo_url' => $conv->host->profile_photo_full_url,
             ],
             'guest' => [
                 'id' => $conv->guest->id,
                 'first_name' => $conv->guest->first_name,
                 'last_name' => $conv->guest->last_name,
-                'profile_photo_url' => $conv->guest->profile_photo_url,
+                'profile_photo_url' => $conv->guest->profile_photo_full_url,
             ],
             'last_message' => $lastMessage ? [
                 'text' => $lastMessage->text,
