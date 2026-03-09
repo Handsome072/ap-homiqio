@@ -9,6 +9,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HostRevenueController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\AdminHostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -122,5 +123,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/listings/{id}/reject', [AdminListingController::class, 'reject']);
         Route::post('/listings/{id}/suspend', [AdminListingController::class, 'suspend']);
         Route::delete('/listings/{id}', [AdminListingController::class, 'destroy']);
+
+        // Admin Hosts Management
+        Route::get('/hosts', [AdminHostController::class, 'index']);
+        Route::get('/hosts/{id}', [AdminHostController::class, 'show']);
+        Route::post('/hosts/{id}/suspend', [AdminHostController::class, 'suspend']);
+        Route::post('/hosts/{id}/ban', [AdminHostController::class, 'ban']);
+        Route::post('/hosts/{id}/activate', [AdminHostController::class, 'activate']);
+        Route::post('/hosts/{id}/note', [AdminHostController::class, 'addNote']);
     });
 });

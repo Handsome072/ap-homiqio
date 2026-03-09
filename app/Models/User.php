@@ -46,6 +46,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'notification_preferences',
         'phone_verified',
         'identity_verified',
+        'host_status',
+        'bank_verified',
+        'address_verified',
+        'verification_date',
+        'fraud_score',
+        'last_login_at',
+        'last_login_ip',
+        'last_login_device',
     ];
 
     /**
@@ -75,6 +83,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'notification_preferences' => 'array',
             'phone_verified' => 'boolean',
             'identity_verified' => 'boolean',
+            'bank_verified' => 'boolean',
+            'address_verified' => 'boolean',
+            'verification_date' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -130,5 +142,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function adminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class);
+    }
+
+    public function hostDocuments(): HasMany
+    {
+        return $this->hasMany(HostDocument::class);
     }
 }
