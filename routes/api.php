@@ -102,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/listings/{id}/reviews', [ReviewController::class, 'store']);
 
     // Listings (Logements)
+    Route::get('/listings/check-title', [ListingController::class, 'checkTitle']);
     Route::get('/listings', [ListingController::class, 'index']);
     Route::post('/listings', [ListingController::class, 'store']);
     Route::get('/listings/{id}', [ListingController::class, 'show']);

@@ -60,6 +60,24 @@ class ListingController extends Controller
     }
 
     /**
+     * GET /api/listings/check-title
+     * Check if a listing title already exists.
+     */
+    public function checkTitle(Request $request): JsonResponse
+    {
+        $request->validate(['title' => 'required|string|max:255']);
+
+        $query = Listing::where('title', $request->query('title'));
+
+        // Exclude current listing when editing
+        if ($request->query('exclude_id')) {
+            $query->where('id', '!=', $request->query('exclude_id'));
+        }
+
+        return response()->json(['exists' => $query->exists()]);
+    }
+
+    /**
      * POST /api/listings
      * Creates a new listing with all form data + base64 photos.
      */
@@ -71,6 +89,13 @@ class ListingController extends Controller
             'capacity'   => 'required|integer|min:1',
             'base_price' => 'required|numeric|min:0',
         ]);
+
+        // Check title uniqueness
+        if (Listing::where('title', $request->title)->exists()) {
+            return response()->json([
+                'message' => 'Ce titre d\'annonce existe déjà. Veuillez en choisir un autre.',
+            ], 422);
+        }
 
         $user = $request->user();
 
@@ -186,6 +211,18 @@ class ListingController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $listing = $request->user()->listings()->findOrFail($id);
+
+        // Check title uniqueness (exclude current listing)
+        if ($request->has('title') && $request->title) {
+            $titleExists = Listing::where('title', $request->title)
+                ->where('id', '!=', $listing->id)
+                ->exists();
+            if ($titleExists) {
+                return response()->json([
+                    'message' => 'Ce titre d\'annonce existe déjà. Veuillez en choisir un autre.',
+                ], 422);
+            }
+        }
 
         $listing->update($request->except(['host_photo', 'chalet_photos', '_method']));
 
