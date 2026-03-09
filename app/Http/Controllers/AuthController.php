@@ -134,6 +134,7 @@ class AuthController extends Controller
                 'email_verified' => $user->hasVerifiedEmail(),
                 'birth_date' => $user->birth_date?->format('Y-m-d'),
                 'receive_marketing' => $user->receive_marketing,
+                'profile_photo_url' => $user->profile_photo_url,
             ],
         ]);
     }

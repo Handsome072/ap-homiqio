@@ -166,6 +166,13 @@ class ListingController extends Controller
                 "listings/{$listing->id}/host"
             );
             $listing->update(['host_photo_path' => $hostPhotoPath]);
+
+            // Also update user profile photo if not already set
+            if (!$user->profile_photo_url) {
+                $user->update([
+                    'profile_photo_url' => '/storage/' . $hostPhotoPath,
+                ]);
+            }
         }
 
         // Save chalet photos (array of base64)
@@ -236,6 +243,14 @@ class ListingController extends Controller
                 "listings/{$listing->id}/host"
             );
             $listing->update(['host_photo_path' => $hostPhotoPath]);
+
+            // Also update user profile photo if not already set
+            $user = $request->user();
+            if (!$user->profile_photo_url) {
+                $user->update([
+                    'profile_photo_url' => '/storage/' . $hostPhotoPath,
+                ]);
+            }
         }
 
         $listing->load('photos');
