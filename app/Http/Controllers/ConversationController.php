@@ -108,8 +108,8 @@ class ConversationController extends Controller
             'lastMessage',
         ])->findOrFail($conversationId);
 
-        // Ensure user is participant
-        if ($conversation->host_id !== $user->id && $conversation->guest_id !== $user->id) {
+        // Ensure user is participant or admin
+        if ($conversation->host_id !== $user->id && $conversation->guest_id !== $user->id && !$user->isAdmin()) {
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
@@ -414,6 +414,7 @@ class ConversationController extends Controller
             'is_archived' => $conv->host_id === $currentUserId
                 ? $conv->host_archived
                 : $conv->guest_archived,
+            'is_admin_conversation' => (bool) $conv->is_admin_conversation,
             'created_at' => $conv->created_at->toIso8601String(),
             'updated_at' => $conv->updated_at->toIso8601String(),
         ];
@@ -421,10 +422,13 @@ class ConversationController extends Controller
 
     private function formatMessage(Message $msg): array
     {
+        $msg->loadMissing('sender:id,first_name,last_name,role');
+
         return [
             'id' => $msg->id,
             'conversation_id' => $msg->conversation_id,
             'sender_id' => $msg->sender_id,
+            'sender_role' => $msg->sender->role ?? 'user',
             'text' => $msg->text,
             'image_url' => $msg->image_url,
             'read_at' => $msg->read_at?->toIso8601String(),

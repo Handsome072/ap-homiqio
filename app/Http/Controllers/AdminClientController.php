@@ -8,6 +8,8 @@ use App\Models\GuestReview;
 use App\Models\ClientReport;
 use App\Models\ActivityLog;
 use App\Models\AdminNote;
+use App\Models\Conversation;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -400,6 +402,98 @@ class AdminClientController extends Controller
         $client->delete();
 
         return response()->json(['message' => 'Client supprime avec succes.']);
+    }
+
+    /**
+     * GET /api/admin/clients/{id}/messages
+     * Get or create admin conversation with a client, return messages.
+     */
+    public function getMessages(Request $request, int $id): JsonResponse
+    {
+        $admin = $request->user();
+        $client = User::findOrFail($id);
+
+        $conversation = Conversation::where('host_id', $admin->id)
+            ->where('guest_id', $client->id)
+            ->where('is_admin_conversation', true)
+            ->first();
+
+        if (!$conversation) {
+            return response()->json([
+                'conversation_id' => null,
+                'messages' => [],
+                'is_admin_conversation' => true,
+            ]);
+        }
+
+        $messages = $conversation->messages()->with('sender:id,first_name,last_name,role')->get();
+
+        return response()->json([
+            'conversation_id' => $conversation->id,
+            'messages' => $messages->map(fn ($msg) => [
+                'id' => $msg->id,
+                'conversation_id' => $msg->conversation_id,
+                'sender_id' => $msg->sender_id,
+                'sender_role' => $msg->sender->role ?? 'user',
+                'sender_name' => trim("{$msg->sender->first_name} {$msg->sender->last_name}"),
+                'text' => $msg->text,
+                'image_url' => $msg->image_url,
+                'read_at' => $msg->read_at?->toIso8601String(),
+                'created_at' => $msg->created_at->toIso8601String(),
+            ]),
+            'is_admin_conversation' => true,
+        ]);
+    }
+
+    /**
+     * POST /api/admin/clients/{id}/messages
+     * Send a message from admin to a client.
+     */
+    public function sendAdminMessage(Request $request, int $id): JsonResponse
+    {
+        $admin = $request->user();
+        $client = User::findOrFail($id);
+
+        $request->validate([
+            'text' => 'required|string|max:5000',
+        ]);
+
+        // Find or create the admin conversation
+        $conversation = Conversation::firstOrCreate(
+            [
+                'host_id' => $admin->id,
+                'guest_id' => $client->id,
+                'is_admin_conversation' => true,
+            ],
+            [
+                'reservation_id' => null,
+                'listing_id' => null,
+            ]
+        );
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => $admin->id,
+            'text' => $request->input('text'),
+        ]);
+
+        $conversation->touch();
+
+        return response()->json([
+            'message' => 'Message envoye',
+            'data' => [
+                'id' => $message->id,
+                'conversation_id' => $message->conversation_id,
+                'sender_id' => $message->sender_id,
+                'sender_role' => 'admin',
+                'sender_name' => 'Admin HOMIQIO',
+                'text' => $message->text,
+                'image_url' => null,
+                'read_at' => null,
+                'created_at' => $message->created_at->toIso8601String(),
+            ],
+            'conversation_id' => $conversation->id,
+        ], 201);
     }
 
     private function formatCurrency(float $amount): string

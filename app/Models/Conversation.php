@@ -19,6 +19,7 @@ class Conversation extends Model
         'guest_id',
         'host_archived',
         'guest_archived',
+        'is_admin_conversation',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Conversation extends Model
         return [
             'host_archived' => 'boolean',
             'guest_archived' => 'boolean',
+            'is_admin_conversation' => 'boolean',
         ];
     }
 

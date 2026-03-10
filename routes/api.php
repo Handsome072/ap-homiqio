@@ -133,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/clients/{id}/activate', [AdminClientController::class, 'activate']);
         Route::post('/clients/{id}/suspect', [AdminClientController::class, 'toggleSuspect']);
         Route::post('/clients/{id}/note', [AdminClientController::class, 'addNote']);
+        Route::get('/clients/{id}/messages', [AdminClientController::class, 'getMessages']);
+        Route::post('/clients/{id}/messages', [AdminClientController::class, 'sendAdminMessage']);
         Route::delete('/clients/{id}', [AdminClientController::class, 'destroy']);
 
         // Admin Hosts Management
