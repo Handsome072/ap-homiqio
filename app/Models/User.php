@@ -54,6 +54,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_login_at',
         'last_login_ip',
         'last_login_device',
+        'client_status',
+        'is_suspect',
+        'login_count',
+        'failed_logins',
     ];
 
     /**
@@ -87,6 +91,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'address_verified' => 'boolean',
             'verification_date' => 'datetime',
             'last_login_at' => 'datetime',
+            'is_suspect' => 'boolean',
+            'login_count' => 'integer',
+            'failed_logins' => 'integer',
         ];
     }
 
@@ -152,5 +159,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hostDocuments(): HasMany
     {
         return $this->hasMany(HostDocument::class);
+    }
+
+    public function guestReviewsReceived(): HasMany
+    {
+        return $this->hasMany(GuestReview::class, 'guest_id');
+    }
+
+    public function guestReviewsGiven(): HasMany
+    {
+        return $this->hasMany(GuestReview::class, 'host_id');
+    }
+
+    public function clientReports(): HasMany
+    {
+        return $this->hasMany(ClientReport::class, 'client_id');
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 }

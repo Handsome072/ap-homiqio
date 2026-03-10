@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             PropertyDetailSeeder::class,
             HostSeeder::class,
+            ClientSeeder::class,
         ]);
     }
 }

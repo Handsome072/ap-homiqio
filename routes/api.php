@@ -10,6 +10,7 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HostRevenueController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminHostController;
+use App\Http\Controllers\AdminClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,6 +124,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/listings/{id}/reject', [AdminListingController::class, 'reject']);
         Route::post('/listings/{id}/suspend', [AdminListingController::class, 'suspend']);
         Route::delete('/listings/{id}', [AdminListingController::class, 'destroy']);
+
+        // Admin Clients Management
+        Route::get('/clients', [AdminClientController::class, 'index']);
+        Route::get('/clients/{id}', [AdminClientController::class, 'show']);
+        Route::post('/clients/{id}/suspend', [AdminClientController::class, 'suspend']);
+        Route::post('/clients/{id}/ban', [AdminClientController::class, 'ban']);
+        Route::post('/clients/{id}/activate', [AdminClientController::class, 'activate']);
+        Route::post('/clients/{id}/suspect', [AdminClientController::class, 'toggleSuspect']);
+        Route::post('/clients/{id}/note', [AdminClientController::class, 'addNote']);
+        Route::delete('/clients/{id}', [AdminClientController::class, 'destroy']);
 
         // Admin Hosts Management
         Route::get('/hosts', [AdminHostController::class, 'index']);
