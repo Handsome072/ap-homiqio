@@ -177,11 +177,11 @@ class AdminListingController extends Controller
             'cancellation_policy' => $listing->cancellation_policy,
             'reservation_mode'    => $listing->reservation_mode,
             'host_photo_url'      => $listing->host_photo_path
-                ? Storage::disk('public')->url($listing->host_photo_path)
+                ? (str_starts_with($listing->host_photo_path, 'http') ? $listing->host_photo_path : Storage::disk('public')->url($listing->host_photo_path))
                 : null,
             'photos'              => $listing->photos->map(fn ($p) => [
                 'id'    => $p->id,
-                'url'   => Storage::disk('public')->url($p->path),
+                'url'   => str_starts_with($p->path, 'http') ? $p->path : Storage::disk('public')->url($p->path),
                 'order' => $p->order,
             ])->values(),
             'created_at'          => $listing->created_at,

@@ -408,7 +408,7 @@ class ListingController extends Controller
             'first_name'        => $host->first_name,
             'profile_photo_url' => $host->profile_photo_full_url
                 ?? ($listing->host_photo_path
-                    ? Storage::disk('public')->url($listing->host_photo_path)
+                    ? (str_starts_with($listing->host_photo_path, 'http') ? $listing->host_photo_path : Storage::disk('public')->url($listing->host_photo_path))
                     : null),
             'profession'        => $host->profession,
             'interests'         => $host->interests,

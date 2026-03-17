@@ -384,13 +384,17 @@ class ConversationController extends Controller
                 'listing' => [
                     'id' => $listing->id,
                     'title' => $listing->title,
-                    'photo_url' => $firstPhoto ? Storage::disk('public')->url($firstPhoto->path) : null,
+                    'photo_url' => $firstPhoto
+                        ? (str_starts_with($firstPhoto->path, 'http') ? $firstPhoto->path : Storage::disk('public')->url($firstPhoto->path))
+                        : null,
                 ],
             ] : null,
             'listing' => $listing ? [
                 'id' => $listing->id,
                 'title' => $listing->title,
-                'photo_url' => $firstPhoto ? Storage::disk('public')->url($firstPhoto->path) : null,
+                'photo_url' => $firstPhoto
+                    ? (str_starts_with($firstPhoto->path, 'http') ? $firstPhoto->path : Storage::disk('public')->url($firstPhoto->path))
+                    : null,
             ] : null,
             'host' => [
                 'id' => $conv->host->id,
