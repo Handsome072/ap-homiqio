@@ -11,6 +11,7 @@ use App\Http\Controllers\HostRevenueController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminHostController;
 use App\Http\Controllers\AdminClientController;
+use App\Http\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,10 @@ Route::get('/health', function () {
 // Public listings (no authentication required)
 Route::get('/listings/public', [ListingController::class, 'publicIndex']);
 Route::get('/listings/public/{id}', [ListingController::class, 'publicShow']);
+
+// Public reservation helpers (no auth required)
+Route::post('/reservations/calculate-price', [ReservationController::class, 'calculatePrice']);
+Route::post('/reservations/check-availability', [ReservationController::class, 'checkAvailability']);
 
 // Public auth routes (no authentication required)
 Route::prefix('auth')->group(function () {
@@ -102,6 +107,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reviews
     Route::post('/listings/{id}/reviews', [ReviewController::class, 'store']);
+
+    // Reservations (authenticated)
+    Route::prefix('reservations')->group(function () {
+        Route::post('/', [ReservationController::class, 'store']);
+        Route::get('/', [ReservationController::class, 'guestReservations']);
+        Route::get('/{id}', [ReservationController::class, 'show']);
+    });
 
     // Listings (Logements)
     Route::get('/listings/check-title', [ListingController::class, 'checkTitle']);
