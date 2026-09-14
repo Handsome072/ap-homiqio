@@ -67,7 +67,7 @@ class PropertyDetailSeeder extends Seeder
                 'base_price'          => 87.56,
                 'weekend_price'       => 99.00,
                 'cleaning_fee'        => 25.00,
-                'currency'            => 'CAD',
+                'currency'            => 'EUR',
                 'cancellation_policy' => 'flexible',
                 'arrival_time'        => '14:00',
                 'departure_time'      => '11:00',

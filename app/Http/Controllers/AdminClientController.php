@@ -154,7 +154,7 @@ class AdminClientController extends Controller
                 'property' => $res->listing->title ?? "Logement #{$res->listing_id}",
                 'host' => $host,
                 'dates' => $this->formatDate($res->check_in) . ' - ' . $this->formatDate($res->check_out),
-                'amount' => $res->total_price ? $this->formatCurrency($res->total_price) : '0 $',
+                'amount' => $res->total_price ? $this->formatCurrency($res->total_price) : '0 €',
                 'status' => $statusMap[$res->status] ?? $res->status,
             ];
         })->values();
@@ -486,7 +486,7 @@ class AdminClientController extends Controller
                 'conversation_id' => $message->conversation_id,
                 'sender_id' => $message->sender_id,
                 'sender_role' => 'admin',
-                'sender_name' => 'Admin HOMIQIO',
+                'sender_name' => 'Admin Séjoura',
                 'text' => $message->text,
                 'image_url' => null,
                 'read_at' => null,
@@ -498,8 +498,8 @@ class AdminClientController extends Controller
 
     private function formatCurrency(float $amount): string
     {
-        if ($amount == 0) return '0 $';
-        return number_format($amount, 0, ',', ' ') . ' $';
+        if ($amount == 0) return '0 €';
+        return number_format($amount, 0, ',', ' ') . ' €';
     }
 
     private function formatDate($date): string

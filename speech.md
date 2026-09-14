@@ -1,10 +1,10 @@
-# Speech de Presentation - HOMIQIO (6 minutes)
+# Speech de Presentation - Séjoura (6 minutes)
 
 ## Introduction (30 secondes)
 
 Bonjour a tous,
 
-Je vais vous presenter Homiqio, une plateforme de location de chalets et d'hebergements de vacances. L'application met en relation des hotes qui proposent leurs proprietes avec des voyageurs qui cherchent un logement. Un administrateur supervise l'ensemble de la plateforme.
+Je vais vous presenter Séjoura, une plateforme de location de chalets et d'hebergements de vacances. L'application met en relation des hotes qui proposent leurs proprietes avec des voyageurs qui cherchent un logement. Un administrateur supervise l'ensemble de la plateforme.
 
 On a trois profils : l'Admin, l'Hote et l'Utilisateur. Je vais vous montrer chacun d'eux.
 
@@ -95,7 +95,7 @@ L'administrateur a une vue complete sur toute la plateforme.
 
 ## Conclusion (30 secondes)
 
-En resume, Homiqio couvre tout le cycle de la location de vacances :
+En resume, Séjoura couvre tout le cycle de la location de vacances :
 - Le voyageur cherche, contacte et reserve.
 - L'hote publie, gere ses proprietes et suit ses revenus.
 - L'admin supervise, modere et assure la securite de la plateforme.

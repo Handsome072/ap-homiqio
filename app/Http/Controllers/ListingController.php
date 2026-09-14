@@ -136,7 +136,7 @@ class ListingController extends Controller
             'max_stay'         => $request->max_stay,
             'arrival_days'     => $request->arrival_days,
             'departure_days'   => $request->departure_days,
-            'currency'         => $request->currency ?? 'CAD',
+            'currency'         => $request->currency ?? 'EUR',
             'base_price'       => $request->base_price,
             'weekend_price'    => $request->weekend_price ?: null,
             'weekly_price'     => $request->weekly_price ?: null,
