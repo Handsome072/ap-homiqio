@@ -28,7 +28,7 @@ use App\Http\Controllers\ReservationController;
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
-        'service' => 'HOMIQIO API',
+        'service' => 'Séjoura API',
         'timestamp' => now()->toIso8601String(),
     ]);
 });

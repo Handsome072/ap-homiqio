@@ -1,6 +1,6 @@
-# HOMIQIO API
+# Séjoura API
 
-Backend API for the HOMIQIO application, built with Laravel 12, PHP 8.4, and Docker.
+Backend API for the Séjoura application, built with Laravel 12, PHP 8.4, and Docker.
 
 ## 🚀 Quick Start
 
@@ -234,7 +234,7 @@ api-homiqio/
 
 ## 🔐 Frontend Integration
 
-This API is configured to accept requests from the HOMIQIO frontend (Next.js) running at `http://localhost:3000`.
+This API is configured to accept requests from the Séjoura frontend (Next.js) running at `http://localhost:3000`.
 
 CORS is configured in `config/cors.php`. To change the allowed frontend URL, update the `.env` file:
 

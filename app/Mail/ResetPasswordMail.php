@@ -28,7 +28,7 @@ class ResetPasswordMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Réinitialisation de votre mot de passe - HOMIQIO',
+            subject: 'Réinitialisation de votre mot de passe - Séjoura',
         );
     }
 

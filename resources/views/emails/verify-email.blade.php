@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vérifiez votre email - HOMIQIO</title>
+    <title>Vérifiez votre email - Séjoura</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -72,13 +72,13 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>HOMIQIO</h1>
+            <h1>Séjoura</h1>
         </div>
         
         <h2>Bonjour {{ $user->first_name }},</h2>
         
         <p>
-            Merci de vous être inscrit sur HOMIQIO ! Pour finaliser votre inscription 
+            Merci de vous être inscrit sur Séjoura ! Pour finaliser votre inscription 
             et accéder à toutes les fonctionnalités, veuillez vérifier votre adresse email.
         </p>
         
@@ -96,13 +96,13 @@
         </p>
         
         <p>
-            Ce lien expirera dans 24 heures. Si vous n'avez pas créé de compte sur HOMIQIO, 
+            Ce lien expirera dans 24 heures. Si vous n'avez pas créé de compte sur Séjoura, 
             vous pouvez ignorer cet email.
         </p>
         
         <div class="footer">
             <p>
-                © {{ date('Y') }} HOMIQIO. Tous droits réservés.<br>
+                © {{ date('Y') }} Séjoura. Tous droits réservés.<br>
                 Cet email a été envoyé automatiquement, merci de ne pas y répondre.
             </p>
         </div>
