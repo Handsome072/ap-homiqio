@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Réinitialisation de mot de passe - HOMIQIO</title>
+    <title>Réinitialisation de mot de passe - Séjoura</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -50,13 +50,13 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>HOMIQIO</h1>
+            <h1>Séjoura</h1>
         </div>
 
         <h2>Bonjour {{ $user->first_name }},</h2>
 
         <p>
-            Vous avez demandé la réinitialisation de votre mot de passe HOMIQIO.
+            Vous avez demandé la réinitialisation de votre mot de passe Séjoura.
             Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
         </p>
 
@@ -78,7 +78,7 @@
 
         <div class="footer">
             <p>
-                © {{ date('Y') }} HOMIQIO. Tous droits réservés.<br>
+                © {{ date('Y') }} Séjoura. Tous droits réservés.<br>
                 Cet email a été envoyé automatiquement, merci de ne pas y répondre.
             </p>
         </div>

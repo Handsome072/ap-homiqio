@@ -34,7 +34,7 @@ class VerifyEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Vérifiez votre adresse email - HOMIQIO',
+            subject: 'Vérifiez votre adresse email - Séjoura',
         );
     }
 

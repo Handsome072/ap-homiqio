@@ -256,7 +256,7 @@ class ClientSeeder extends Seeder
                     'capacity' => rand(2, 8),
                     'bathrooms' => rand(1, 3),
                     'base_price' => $ld['base_price'],
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                     'reservation_mode' => 'instant',
                 ]
             );
@@ -277,7 +277,7 @@ class ClientSeeder extends Seeder
             $createdClients[$cd['email']] = $client;
         }
 
-        // ---- Jean Dupont (jean.dupont@email.com) - 12 bookings, 8320$ ----
+        // ---- Jean Dupont (jean.dupont@email.com) - 12 bookings, 8320 € ----
         $jean = $createdClients['jean.dupont@email.com'];
 
         $jeanBookings = [
@@ -298,7 +298,7 @@ class ClientSeeder extends Seeder
                     'guests_count' => rand(1, 4),
                     'status' => $b['status'],
                     'total_price' => $b['amount'],
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                     'cancellation_reason' => $b['reason'] ?? null,
                 ]
             );
@@ -316,7 +316,7 @@ class ClientSeeder extends Seeder
                     'guests_count' => rand(1, 3),
                     'status' => 'completed',
                     'total_price' => rand(200, 600),
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                 ]
             );
         }
@@ -393,7 +393,7 @@ class ClientSeeder extends Seeder
             ['author' => 'Admin', 'created_at' => Carbon::parse('2025-03-01'), 'updated_at' => Carbon::parse('2025-03-01')]
         );
 
-        // ---- Marie Simon (marie.simon@email.com) - 8 bookings, 5140$ ----
+        // ---- Marie Simon (marie.simon@email.com) - 8 bookings, 5140 € ----
         $marie = $createdClients['marie.simon@email.com'];
 
         $marieBookings = [
@@ -410,7 +410,7 @@ class ClientSeeder extends Seeder
                     'guests_count' => rand(1, 3),
                     'status' => $b['status'],
                     'total_price' => $b['amount'],
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                 ]
             );
         }
@@ -426,7 +426,7 @@ class ClientSeeder extends Seeder
                     'guests_count' => rand(1, 2),
                     'status' => 'completed',
                     'total_price' => rand(300, 600),
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                 ]
             );
         }
@@ -513,7 +513,7 @@ class ClientSeeder extends Seeder
                     'guests_count' => rand(1, 4),
                     'status' => $status,
                     'total_price' => $amount,
-                    'currency' => 'USD',
+                    'currency' => 'EUR',
                     'cancellation_reason' => $status === 'cancelled' ? 'Annulation client' : null,
                 ]);
             }

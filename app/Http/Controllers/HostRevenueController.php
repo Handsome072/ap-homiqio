@@ -47,7 +47,7 @@ class HostRevenueController extends Controller
             'revenue_this_year' => round((float) $thisYear, 2),
             'revenue_total' => round((float) $total, 2),
             'revenue_estimated' => round((float) $estimated, 2),
-            'currency' => 'CAD',
+            'currency' => 'EUR',
         ]);
     }
 
